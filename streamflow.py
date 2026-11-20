@@ -37,6 +37,8 @@ def plot_streamflow(dates, flows, sites):
     plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=3))
     plt.gcf().autofmt_xdate()
     plt.tight_layout()
+    output_path = Path(__file__).resolve().parent / "provo_streamflow.png"
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.show()
 
 
