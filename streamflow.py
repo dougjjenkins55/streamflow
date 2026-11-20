@@ -1,3 +1,4 @@
+import csv
 from pathlib import Path
 
 import matplotlib.dates as mdates
@@ -42,9 +43,38 @@ def plot_streamflow(dates, flows, sites):
     plt.show()
 
 
+# Excel check: for gauge 10163000, the maximum is 131.0 cfs and the average is 57.0 cfs.
+def summarize(dates, flows, sites):
+    """Find and print each gauge's maximum, minimum, and average flow, then save a CSV summary."""
+    rows = []
+
+    print(f"{'Gauge':<12}{'Max (cfs)':>12}{'Date of max':>24}{'Min (cfs)':>12}{'Avg (cfs)':>12}")
+
+    for column, site in enumerate(sites):
+        gauge_flow = flows[:, column]
+        max_index = np.argmax(gauge_flow)
+        max_flow = gauge_flow[max_index]
+        max_date = np.datetime_as_string(dates[max_index], unit="m")
+        min_flow = np.min(gauge_flow)
+        avg_flow = np.mean(gauge_flow)
+
+        print(
+            f"{site:<12}{max_flow:>12.1f}{max_date:>24}"
+            f"{min_flow:>12.1f}{avg_flow:>12.1f}"
+        )
+        rows.append([site, f"{max_flow:.1f}", max_date, f"{min_flow:.1f}", f"{avg_flow:.1f}"])
+
+    summary_path = Path(__file__).resolve().parent / "streamflow_summary.csv"
+    with summary_path.open("w", newline="", encoding="utf-8") as summary_file:
+        writer = csv.writer(summary_file)
+        writer.writerow(["Gauge", "Max (cfs)", "Date of max", "Min (cfs)", "Avg (cfs)"])
+        writer.writerows(rows)
+
+
 if __name__ == "__main__":
     sites = ["10163000", "10155200", "10155500", "10154200", "10155000"]
     csv_path = Path(__file__).resolve().parent / "June-2021-Provo-River-Streamflow-Rates.csv"
     dates, flows = load_streamflow(csv_path)
     plot_streamflow(dates, flows, sites)
+    summarize(dates, flows, sites)
 
