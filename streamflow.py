@@ -78,3 +78,12 @@ if __name__ == "__main__":
     plot_streamflow(dates, flows, sites)
     summarize(dates, flows, sites)
 
+    threshold = float(input("Enter a flow threshold in cfs: "))
+
+    print("\nHours above threshold:")
+    # Each reading represents 15 minutes, or 0.25 hours.
+    for column, site in enumerate(sites):
+        reading_count = np.sum(flows[:, column] > threshold)
+        hours_above = reading_count * 0.25
+        print(f"{site}: {hours_above:.2f} hours")
+
